@@ -2,6 +2,7 @@
 #include <vector>
 #include <stack>
 #include <map>
+#include <algorithm>
 
 typedef  int                  Node; 
 typedef  std::vector<Node>    AdjList; 
