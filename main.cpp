@@ -2,6 +2,7 @@
 #include <vector>
 #include <stack>
 #include <map>
+#include <algorithm>
 
 typedef  int                  Node; 
 typedef  std::vector<Node>    AdjList; 
@@ -17,7 +18,6 @@ class CIRCUIT_ENUMERATION {
     AdjList::iterator DELETE(AdjList & a, Node v);  
     void OUTPUT(); 
 
-    int __count_vertex_num(); 
     int __cnt; 
 
     Graph G; 
@@ -33,10 +33,14 @@ class CIRCUIT_ENUMERATION {
 int main(int argc, char const* argv[])
 {
     Graph g = {
-        {1, 2, 3}, 
-        {0, 2, 3}, 
-        {0, 1, 3}, 
-        {0, 1, 2}
+        {2, 6}, 
+        {}, 
+        {3}, 
+        {0}, 
+        {}, 
+        {}, 
+        {3}, 
+        {}
     }; 
 
     CIRCUIT_ENUMERATION CE; 
@@ -44,23 +48,11 @@ int main(int argc, char const* argv[])
     return 0;
 }
 
-int CIRCUIT_ENUMERATION::__count_vertex_num()
-{
-    std::vector<Node> flat; 
-    for (auto& a : G) {
-        flat.insert(flat.end(), a.begin(), a.end()); 
-    }
-    std::sort(flat.begin(), flat.end());
-    flat.erase(std::unique(flat.begin(), flat.end()), flat.end()); 
-
-    return (int)flat.size(); 
-}
-
 void CIRCUIT_ENUMERATION::MAIN(Graph & __g) 
 {
     G = __g; 
     
-    int V = __count_vertex_num(); 
+    int V = (int)G.size(); 
     for (Node i = 0; i < V; ++i) {
         mark[i] = false; 
     }
