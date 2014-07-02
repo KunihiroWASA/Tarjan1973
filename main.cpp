@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <stack>
+#include <map>
 
 typedef  int                  Node; 
 typedef  std::vector<Node>    AdjList; 
@@ -8,16 +9,22 @@ typedef  std::vector<AdjList> Graph;
 
 class CIRCUIT_ENUMERATION {
     
+    Node s; 
     std::stack<Node> point_stack; 
     std::stack<Node> marked_stack; 
-    std::vector<bool> marked; 
-    void BACKTRACK(Node v, bool f); 
-    bool DELETE(AdjList a, Node v);  
+    std::map<Node, bool> mark; 
+    void BACKTRACK(Node v, bool & f); 
+    AdjList::iterator DELETE(AdjList & a, Node v);  
+    void OUTPUT(); 
 
-    Graph g; 
+    int __count_vertex_num(); 
+    int __cnt; 
+
+    Graph G; 
 
     public:
-        CIRCUIT_ENUMERATION(Graph & __g);
+        CIRCUIT_ENUMERATION();
+        void MAIN(Graph & __g);  
 };
 
 
@@ -25,31 +32,118 @@ class CIRCUIT_ENUMERATION {
 
 int main(int argc, char const* argv[])
 {
-    std::cout << "hello, world!" << std::endl;
+    Graph g = {
+        {1, 2, 3}, 
+        {0, 2, 3}, 
+        {0, 1, 3}, 
+        {0, 1, 2}
+    }; 
+
+    CIRCUIT_ENUMERATION CE; 
+    CE.MAIN(g); 
     return 0;
 }
 
-void CIRCUIT_ENUMERATION::BACKTRACK(Node v, bool f) 
+int CIRCUIT_ENUMERATION::__count_vertex_num()
+{
+    std::vector<Node> flat; 
+    for (auto& a : G) {
+        flat.insert(flat.end(), a.begin(), a.end()); 
+    }
+    std::sort(flat.begin(), flat.end());
+    flat.erase(std::unique(flat.begin(), flat.end()), flat.end()); 
+
+    return (int)flat.size(); 
+}
+
+void CIRCUIT_ENUMERATION::MAIN(Graph & __g) 
+{
+    G = __g; 
+    
+    int V = __count_vertex_num(); 
+    for (Node i = 0; i < V; ++i) {
+        mark[i] = false; 
+    }
+
+    bool flag; 
+    __cnt = 0; 
+    for (s = 0; s < V; ++s) {
+        BACKTRACK(s, flag); 
+        while (!marked_stack.empty()) {
+            Node u = marked_stack.top(); 
+            mark[u] = false; 
+            marked_stack.pop(); 
+        }
+    }
+}
+
+void CIRCUIT_ENUMERATION::BACKTRACK(Node v, bool & f) 
 {
     bool g; 
     f = false; 
     point_stack.push(v); 
-    marked.at(v) = true;  
+    mark[v] = true;  
     marked_stack.push(v); 
 
-    for (auto& w : G.at(v)) {
+    for (auto itr = G.at(v).begin(); itr != G.at(v).end();) {
+        Node w = *itr; 
         if (w < s) {
-            DELETE(G.at(v), w);  
+            itr = DELETE(G.at(v), w);  
+        } else if (w == s) {
+            OUTPUT(); 
+            f = true; 
+        } else if (mark[w] == false) {
+            BACKTRACK(w, g); 
+            f = f or g; 
+        }
+
+        if (w >= s) {
+            ++itr; 
         }
     }
 
+    if (f == true) {
+        while (marked_stack.top() != v) {
+            Node u = marked_stack.top(); 
+            marked_stack.pop(); 
+            mark[u] = false; 
+        }
+        marked_stack.pop(); 
+        mark[v] = false; 
+    }
+    point_stack.pop(); 
 }
 
-bool CIRCUIT_ENUMERATION::DELETE(AdjList a, Node v) 
+AdjList::iterator CIRCUIT_ENUMERATION::DELETE(AdjList & a, Node v) 
 {
-    
+    AdjList::iterator itr; 
+    for (auto itr = a.begin(); itr != a.end(); ++itr) {
+        if (*itr == v) {
+            return a.erase(itr); 
+        }
+    }
+
+    return a.end(); 
 }
-CIRCUIT_ENUMERATION::CIRCUIT_ENUMERATION(Graph & __g) 
+
+void CIRCUIT_ENUMERATION::OUTPUT()
 {
-    g = __g; 
+    std::stack<Node> rev_point_stack; 
+    std::cout << "C" << __cnt++ << ": " << s; 
+    while (!point_stack.empty()) {
+        Node t = point_stack.top(); 
+        std::cout << " -> " << t; 
+        point_stack.pop(); 
+        rev_point_stack.push(t); 
+    }
+    std::cout << std::endl; 
+    while (!rev_point_stack.empty()) {
+        Node t = rev_point_stack.top(); 
+        rev_point_stack.pop(); 
+        point_stack.push(t); 
+    }
+}
+
+CIRCUIT_ENUMERATION::CIRCUIT_ENUMERATION() 
+{
 }
